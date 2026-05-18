@@ -1,0 +1,181 @@
+{
+  "resortName": "",
+  "currency": "RM",
+  "taxSstPercentage": 8,
+  "tourismTaxPerRoomNight": 10,
+  "singleOccupancySurchargePerNight": 200,
+  "lockPriceDepositPerPax": 100,
+  "lockPriceValidityYears": 1,
+  "surcharges": {
+    "peakSeasonPerPax": 30,
+    "superPeakSeasonPerPax": 60
+  },
+  "transfers": {
+    "boatTransfer": {
+      "adult": 100,
+      "child": 79
+    }
+  },
+  "gearRental": {
+    "snorkelingGearSet": 45,
+    "scubaEquipmentPerDay": 90
+  },
+  "roomCategories": [
+    {
+      "id": "dorm",
+      "name": "Dormitory Room",
+      "description": "Baseline bunk beds (separate by gender)",
+      "upgradeCostPerPax": 0
+    },
+    {
+      "id": "standard",
+      "name": "Standard Room",
+      "description": "Baseline standard hotel room layout",
+      "upgradeCostPerPax": 0
+    },
+    {
+      "id": "bayview",
+      "name": "Bayview Chalet",
+      "description": "Charming wooden chalet near the beach shoreline",
+      "upgradeCostPerPax": 100
+    },
+    {
+      "id": "beachfrontChalet",
+      "name": "Beach Front Chalet",
+      "description": "Classic sea-facing wooden chalet with balcony",
+      "upgradeCostPerPax": 150
+    },
+    {
+      "id": "beachfrontDeluxe",
+      "name": "Beach Front Deluxe",
+      "description": "Premium spacious shoreline layout with beach views",
+      "upgradeCostPerPax": 300
+    },
+    {
+      "id": "hillsideVilla",
+      "name": "Hillside Villa",
+      "description": "Luxury elevated chalet offering high privacy",
+      "upgradeCostPerPax": 450
+    },
+    {
+      "id": "seaviewVilla",
+      "name": "Hillside / Seaview Villa",
+      "description": "Premium elevated villa with direct panoramic bay views",
+      "upgradeCostPerPax": 600
+    }
+  ],
+  "packages": [
+    {
+      "id": "padi_owc",
+      "name": "PADI Open Water Course (OWC)",
+      "duration": "4D3N",
+      "type": "diver",
+      "category": "course",
+      "rates": {
+        "dorm": 1538,
+        "triple_quad": 1788,
+        "twin": 1988
+      }
+    },
+    {
+      "id": "padi_aowc",
+      "name": "PADI Advanced Open Water Course (AOWC)",
+      "duration": "4D3N",
+      "type": "diver",
+      "category": "course",
+      "rates": {
+        "dorm": 1550,
+        "triple_quad": 1688,
+        "twin": 1788
+      }
+    },
+    {
+      "id": "padi_rescue_efr",
+      "name": "PADI Rescue & EFR Course",
+      "duration": "4D3N",
+      "type": "diver",
+      "category": "course",
+      "rates": {
+        "dorm": 1600,
+        "triple_quad": 1788,
+        "twin": 1950
+      }
+    },
+    {
+      "id": "fun_dive_3d2n",
+      "name": "3D2N Fun Dive Package (4 Dives)",
+      "duration": "3D2N",
+      "type": "diver",
+      "category": "fundive",
+      "rates": {
+        "weekday": {
+          "dorm_quad": 892,
+          "triple": 960,
+          "twin": 1079
+        },
+        "weekend": {
+          "dorm_quad": 994,
+          "triple": 1062,
+          "twin": 1181
+        }
+      }
+    },
+    {
+      "id": "fun_dive_4d3n",
+      "name": "4D3N Fun Dive Package (5 Dives)",
+      "duration": "4D3N",
+      "type": "diver",
+      "category": "fundive",
+      "rates": {
+        "weekday": {
+          "dorm_quad": 1052,
+          "triple": 1139,
+          "twin": 1249
+        },
+        "weekend": {
+          "dorm_quad": 1164,
+          "triple": 1241,
+          "twin": 1351
+        }
+      }
+    },
+    {
+      "id": "snorkeling_3d2n",
+      "name": "3D2N Snorkeling Package (2 Boat Trips)",
+      "duration": "3D2N",
+      "type": "snorkeler",
+      "category": "snorkeling",
+      "rates": {
+        "weekday": {
+          "quad": 705,
+          "triple": 782,
+          "twin": 875
+        },
+        "weekend": {
+          "quad": 799,
+          "triple": 875,
+          "twin": 969
+        }
+      }
+    },
+    {
+      "id": "snorkeling_4d3n",
+      "name": "4D3N Snorkeling Package (3 Boat Trips)",
+      "duration": "4D3N",
+      "type": "snorkeler",
+      "category": "snorkeling",
+      "rates": {
+        "weekday": {
+          "quad": 867,
+          "triple": 986,
+          "twin": 1079
+        },
+        "weekend": {
+          "quad": 960,
+          "triple": 1079,
+          "twin": 1173
+        }
+      }
+    }
+  ]
+}

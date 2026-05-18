@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ocean-dark: #030d22;
+  --color-ocean-medium: #071a39;
+  --color-ocean-light: #0f2c59;
+  --color-coral-glow: #ff6f61;
+  --color-coral-hover: #ff5443;
+  --color-cyan-glow: #00f0ff;
+  --color-cyan-hover: #00d8e6;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+:root {
+  --background: #030d22;
+  --foreground: #f8fafc;
+  --glass-bg: rgba(7, 26, 57, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(255, 255, 255, 0.15);
+  --accent-glow: 0 0 20px rgba(0, 240, 255, 0.35);
+  --coral-glow-shadow: 0 0 20px rgba(255, 111, 97, 0.35);
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, #0c254e 0%, #030d22 100%) no-repeat;
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar for mobile/promoters */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(3, 13, 34, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.6);
+}
+
+/* Premium Glassmorphism Utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(0, 240, 255, 0.25);
+}
+
+.glass-card-interactive {
+  background: rgba(15, 44, 89, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(15, 44, 89, 0.75);
+  border-color: rgba(0, 240, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-card-selected {
+  background: rgba(15, 44, 89, 0.85);
+  border-color: #00f0ff;
+  box-shadow: var(--accent-glow);
+}
+
+/* Neon utilities */
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.glow-coral {
+  text-shadow: 0 0 10px rgba(255, 111, 97, 0.5);
+}
+
+/* Hide default input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
