@@ -1,0 +1,37 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Booking {
+  id                    String   @id @default(uuid())
+  customerName          String
+  customerEmail         String?
+  customerPhone         String?
+  invoiceNumber         String?
+  travelDatesConfirmed  Boolean
+  roomCategoryId        String
+  roomCount             Int
+  adultCount            Int
+  childCount            Int
+  infantCount           Int
+  weekendTravel         Boolean
+  peakSeason            Boolean
+  superPeakSeason       Boolean
+  isForeigner           Boolean
+  includeBoatTransfer   Boolean
+  includeSnorkelingGear Boolean
+  scubaGearDays         Int
+  discountType          String
+  discountValue         Float
+  lockPriceSelected     Boolean
+  grandTotal            Float
+  whatsappQuote         String   @db.Text
+  packageSelections     Json     // Stores the array of PackageSelectionItem
+  createdAt             DateTime @default(now())
+}

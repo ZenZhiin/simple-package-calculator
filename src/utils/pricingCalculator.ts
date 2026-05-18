@@ -68,6 +68,9 @@ export interface CalculationInput {
   discountType: 'percentage' | 'flat';
   discountValue: number;
   lockPriceSelected: boolean;
+  customerEmail?: string;
+  customerPhone?: string;
+  invoiceNumber?: string;
 }
 
 export interface CalculationResult {
@@ -301,6 +304,10 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
   const citizenship = input.isForeigner ? 'Foreigner' : 'Malaysian';
 
   let msg = `🌴 *${resortName.toUpperCase()}* 🌴\n`;
+  if (input.invoiceNumber) {
+    msg += `📄 *Invoice No:* ${input.invoiceNumber}\n`;
+  }
+  msg += `-------------------------------------------\n`;
 
   // --- DUAL PATH FORMATTING ---
   if (!input.travelDatesConfirmed && input.lockPriceSelected) {
@@ -309,6 +316,8 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
     msg += `👤 *Client Group:* ${result.totalAdults} Adult(s)`;
     if (result.totalChildren > 0) msg += `, ${result.totalChildren} Child(ren)`;
     msg += `\n`;
+    if (input.customerEmail) msg += `📧 *Email:* ${input.customerEmail}\n`;
+    if (input.customerPhone) msg += `📞 *Contact:* ${input.customerPhone}\n`;
     msg += `📅 *Travel Dates:* To Be Confirmed (Flexible Stay) 🗓️\n`;
     msg += `🔒 *Lock validity:* 1 Year (Claim by 18-May-2027) ✅\n`;
     msg += `-------------------------------------------\n`;
@@ -351,6 +360,8 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
     if (result.totalChildren > 0) msg += `, ${result.totalChildren} Child(ren)`;
     if (input.infantCount > 0) msg += `, ${input.infantCount} Infant(s) (0-3 yrs)`;
     msg += `\n`;
+    if (input.customerEmail) msg += `📧 *Email:* ${input.customerEmail}\n`;
+    if (input.customerPhone) msg += `📞 *Contact:* ${input.customerPhone}\n`;
     msg += `🇲🇾 *Citizenship:* ${citizenship}\n`;
     msg += `🔑 *Rooms booked:* ${input.roomCount} room(s)\n`;
     if (input.singleOccupancyRooms > 0) {

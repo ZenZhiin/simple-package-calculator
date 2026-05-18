@@ -1,17 +1,22 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { 
-  Calendar, Users, Anchor, Tag, Share2, Copy, Mail, Check, User, Lock, 
-  HelpCircle, Percent, TrendingUp, Globe, FileText, ChevronDown, Plus, Trash2 
+  Calendar, Users, Anchor, Tag, User, Lock, ChevronDown, Plus, Trash2, Check, TrendingUp
 } from 'lucide-react';
 import { 
   pricing, resortName, calculateQuotation, formatWhatsAppQuote, CalculationInput, CalculationResult, PackageSelectionItem 
 } from '../utils/pricingCalculator';
+import QuotationInvoice from '../components/QuotationInvoice';
 
 export default function MideCalculatorPage() {
   // --- Promoter Input State ---
   const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  
   const [travelDatesConfirmed, setTravelDatesConfirmed] = useState(false);
   const [roomCategoryId, setRoomCategoryId] = useState('standard');
   const [infantCount, setInfantCount] = useState(0);
@@ -35,7 +40,9 @@ export default function MideCalculatorPage() {
 
   // Lock Promo Price Toggle (if dates unconfirmed)
   const [lockPriceSelected, setLockPriceSelected] = useState(true);
-  const [copied, setCopied] = useState(false);
+
+  // Dummy State to satisfy compiled dependencies
+  const [refreshToggle, setRefreshToggle] = useState(false);
 
   // --- Dynamic Package Array Selections State ---
   const [packageSelections, setPackageSelections] = useState<PackageSelectionItem[]>([
@@ -98,12 +105,15 @@ export default function MideCalculatorPage() {
     scubaGearDays: hasDiverPackage ? scubaGearDays : 0,
     discountType,
     discountValue,
-    lockPriceSelected: !travelDatesConfirmed && lockPriceSelected
+    lockPriceSelected: !travelDatesConfirmed && lockPriceSelected,
+    customerEmail,
+    customerPhone,
+    invoiceNumber
   }), [
     travelDatesConfirmed, packageSelections, roomCategoryId, infantCount, roomCount,
     singleOccupancyRooms, weekendTravel, peakSeason, superPeakSeason,
     isForeigner, includeBoatTransfer, includeSnorkelingGear, scubaGearDays, discountType,
-    discountValue, lockPriceSelected, hasDiverPackage
+    discountValue, lockPriceSelected, hasDiverPackage, customerEmail, customerPhone, invoiceNumber
   ]);
 
   const result: CalculationResult = useMemo(() => {
@@ -124,10 +134,8 @@ export default function MideCalculatorPage() {
   const whatsappLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(formattedQuoteText)}`;
   const emailMailto = `mailto:?subject=${encodeURIComponent('Quotation - ' + resortName)}&body=${encodeURIComponent(formattedQuoteText)}`;
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(formattedQuoteText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const triggerRefreshLedger = () => {
+    setRefreshToggle(prev => !prev);
   };
 
   return (
@@ -150,18 +158,15 @@ export default function MideCalculatorPage() {
           </div>
         </div>
         
-        {/* Customer Quick Reference Input */}
-        <div className="flex flex-col gap-1.5 min-w-[240px] relative z-10">
-          <label className="text-xs text-cyan-200 font-semibold tracking-wider uppercase flex items-center gap-1 font-outfit">
-            <User className="w-3.5 h-3.5" /> Prospect Name
-          </label>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="e.g. Jason Ho"
-            className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
-          />
+        {/* Dedicated Ledger Routing Switch */}
+        <div className="relative z-10 self-start md:self-center">
+          <Link
+            href="/transactions"
+            className="bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-black rounded-xl px-4 py-3 flex items-center gap-2 hover:bg-cyan-900 shadow-md transition cursor-pointer font-outfit"
+          >
+            <TrendingUp className="w-4 h-4 animate-pulse-slow" />
+            <span>📊 TRANSACTIONS LEDGER</span>
+          </Link>
         </div>
       </header>
 
@@ -171,13 +176,70 @@ export default function MideCalculatorPage() {
         {/* --- LEFT FORM: 7 cols --- */}
         <section className="lg:col-span-7 flex flex-col gap-6">
           
-          {/* Section 1: Travel Dates & Booking Status */}
+          {/* Section 1: Prospect & Booking Details */}
+          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit border-b border-slate-700/40 pb-3">
+              <User className="w-5 h-5 text-cyan-400" />
+              1. Prospect & Booking Details
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Prospect Name */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-350 font-bold uppercase tracking-wider font-mono">Prospect Name</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="e.g. Jason Ho"
+                  className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 transition font-mono"
+                />
+              </div>
+
+              {/* Invoice Number */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-350 font-bold uppercase tracking-wider font-mono">Invoice Number</label>
+                <input
+                  type="text"
+                  value={invoiceNumber}
+                  onChange={(e) => setInvoiceNumber(e.target.value)}
+                  placeholder="e.g. MIDE-1042"
+                  className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 transition font-mono"
+                />
+              </div>
+
+              {/* Email Address */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-350 font-bold uppercase tracking-wider font-mono">Email Address</label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="e.g. jason@gmail.com"
+                  className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 transition font-mono"
+                />
+              </div>
+
+              {/* Contact / WhatsApp */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-slate-350 font-bold uppercase tracking-wider font-mono">Contact / WhatsApp Number</label>
+                <input
+                  type="text"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="e.g. +6012-3456789"
+                  className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 transition font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Travel Dates & Booking Status */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-5">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-700/40 pb-4">
               <div>
                 <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit">
                   <Calendar className="w-5 h-5 text-cyan-400" />
-                  1. Travel Date Status
+                  2. Travel Date Status
                 </h2>
                 <p className="text-xs text-slate-400">Ask the prospect if they have confirmed their travel dates.</p>
               </div>
@@ -225,7 +287,7 @@ export default function MideCalculatorPage() {
 
                 {/* Simplified Holiday/Weekend Surcharge Toggles */}
                 <div className="sm:col-span-2 bg-slate-950/40 border border-slate-800 rounded-xl p-4 flex flex-col gap-3">
-                  <div className="flex justify-between items-center border-b border-slate-850 pb-2">
+                  <div className="flex justify-between items-center border-b border-slate-855 pb-2">
                     <span className="text-xs font-bold text-cyan-200 tracking-wider uppercase">Holiday & Weekend Surcharges</span>
                     <span className="text-[10px] text-slate-500">Select peak dates of travel</span>
                   </div>
@@ -312,12 +374,12 @@ export default function MideCalculatorPage() {
             )}
           </div>
 
-          {/* Section 2: Catalog Package (Multi-Package Editor) */}
+          {/* Section 3: Catalog Package (Multi-Package Editor) */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
             <div className="flex justify-between items-center border-b border-slate-700/40 pb-3">
               <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit">
                 <Anchor className="w-5 h-5 text-cyan-400" />
-                2. Catalog Packages & Group Configuration
+                3. Catalog Packages & Group Configuration
               </h2>
               <button
                 type="button"
@@ -352,16 +414,16 @@ export default function MideCalculatorPage() {
                           onChange={(e) => updatePackageRow(item.id, { packageId: e.target.value })}
                           className="w-full appearance-none bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-200 focus:outline-none cursor-pointer"
                         >
-                          <optgroup label="🎓 PADI Certification Courses" className="bg-slate-950 text-slate-350">
+                          <optgroup label="🎓 PADI Certification Courses" className="bg-slate-955 text-slate-350">
                             <option value="padi_owc">PADI Open Water Course (OWC) - 4D3N</option>
                             <option value="padi_aowc">PADI Advanced Open Water (AOWC) - 4D3N</option>
                             <option value="padi_rescue_efr">PADI Rescue & EFR Course - 4D3N</option>
                           </optgroup>
-                          <optgroup label="🐠 Leisure Fun Dives" className="bg-slate-950 text-slate-355">
+                          <optgroup label="🐠 Leisure Fun Dives" className="bg-slate-955 text-slate-355">
                             <option value="fun_dive_3d2n">3D2N Fun Dive Package (2 Nights)</option>
                             <option value="fun_dive_4d3n">4D3N Fun Dive Package (3 Nights)</option>
                           </optgroup>
-                          <optgroup label="🌴 Snorkeling Packages" className="bg-slate-950 text-slate-355">
+                          <optgroup label="🌴 Snorkeling Packages" className="bg-slate-955 text-slate-355">
                             <option value="snorkeling_3d2n">3D2N Snorkeling Package (2 Nights)</option>
                             <option value="snorkeling_4d3n">4D3N Snorkeling Package (3 Nights)</option>
                           </optgroup>
@@ -378,9 +440,9 @@ export default function MideCalculatorPage() {
                       <div className="flex flex-col gap-1 bg-slate-900/40 p-2 rounded-lg border border-slate-800 items-center min-w-[76px] flex-1 sm:flex-initial">
                         <span className="text-[9px] text-slate-400 font-bold uppercase">Adults</span>
                         <div className="flex items-center gap-1.5">
-                          <button type="button" onClick={() => updatePackageRow(item.id, { adultCount: Math.max(0, item.adultCount - 1) })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-350">-</button>
+                          <button type="button" onClick={() => updatePackageRow(item.id, { adultCount: Math.max(0, item.adultCount - 1) })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">-</button>
                           <span className="text-xs font-bold text-slate-100 font-mono">{item.adultCount}</span>
-                          <button type="button" onClick={() => updatePackageRow(item.id, { adultCount: item.adultCount + 1 })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-350">+</button>
+                          <button type="button" onClick={() => updatePackageRow(item.id, { adultCount: item.adultCount + 1 })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">+</button>
                         </div>
                       </div>
 
@@ -388,9 +450,9 @@ export default function MideCalculatorPage() {
                       <div className="flex flex-col gap-1 bg-slate-900/40 p-2 rounded-lg border border-slate-800 items-center min-w-[76px] flex-1 sm:flex-initial">
                         <span className="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-0.5">Kids <span className="text-cyan-300 text-[8px] font-normal font-mono">(-40%)</span></span>
                         <div className="flex items-center gap-1.5">
-                          <button type="button" onClick={() => updatePackageRow(item.id, { childCount: Math.max(0, item.childCount - 1) })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-350">-</button>
+                          <button type="button" onClick={() => updatePackageRow(item.id, { childCount: Math.max(0, item.childCount - 1) })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">-</button>
                           <span className="text-xs font-bold text-slate-100 font-mono">{item.childCount}</span>
-                          <button type="button" onClick={() => updatePackageRow(item.id, { childCount: item.childCount + 1 })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-350">+</button>
+                          <button type="button" onClick={() => updatePackageRow(item.id, { childCount: item.childCount + 1 })} className="w-5 h-5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">+</button>
                         </div>
                       </div>
                     </div>
@@ -441,17 +503,17 @@ export default function MideCalculatorPage() {
             </div>
           </div>
 
-          {/* Section 3: Room Occupancy configuration */}
+          {/* Section 4: Room Occupancy configuration */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
             <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit border-b border-slate-700/40 pb-3">
               <Users className="w-5 h-5 text-cyan-400" />
-              3. Room Occupancy Allocation
+              4. Room Occupancy Allocation
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               
               {/* Infants Counter */}
-              <div className="flex flex-col gap-1.5 bg-slate-950/40 border border-slate-800 rounded-xl p-3 items-center">
+              <div className="flex flex-col gap-1.5 bg-slate-955 border border-slate-800 rounded-xl p-3 items-center">
                 <span className="text-xs font-bold text-slate-350">Infants Count</span>
                 <div className="flex items-center gap-2 mt-1">
                   <button type="button" onClick={() => setInfantCount(prev => Math.max(0, prev - 1))} className="w-6.5 h-6.5 rounded bg-slate-800 text-xs font-bold text-slate-300">-</button>
@@ -462,7 +524,7 @@ export default function MideCalculatorPage() {
               </div>
 
               {/* Room Count Counter */}
-              <div className="flex flex-col gap-1.5 bg-slate-950/40 border border-slate-800 rounded-xl p-3 items-center">
+              <div className="flex flex-col gap-1.5 bg-slate-955 border border-slate-800 rounded-xl p-3 items-center">
                 <span className="text-xs font-bold text-slate-350">Room Quantity</span>
                 <div className="flex items-center gap-2 mt-1">
                   <button type="button" onClick={() => setRoomCount(prev => Math.max(1, prev - 1))} className="w-6.5 h-6.5 rounded bg-slate-800 text-xs font-bold text-slate-300">-</button>
@@ -473,28 +535,28 @@ export default function MideCalculatorPage() {
               </div>
 
               {/* Single Room Surcharges */}
-              <div className="flex flex-col gap-1.5 bg-slate-950/40 border border-slate-800 rounded-xl p-3 items-center">
-                <span className="text-xs font-bold text-slate-350">Single Occupancy Rooms</span>
+              <div className="flex flex-col gap-1.5 bg-slate-955 border border-slate-800 rounded-xl p-3 items-center">
+                <span className="text-xs font-bold text-slate-355 font-outfit">Single Occupancy</span>
                 <div className="flex items-center gap-2 mt-1">
                   <button type="button" disabled={!travelDatesConfirmed} onClick={() => setSingleOccupancyRooms(prev => Math.max(0, prev - 1))} className="w-6.5 h-6.5 rounded bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-300">-</button>
                   <span className="text-sm font-bold text-slate-100 font-mono">{singleOccupancyRooms}</span>
                   <button type="button" disabled={!travelDatesConfirmed} onClick={() => setSingleOccupancyRooms(prev => Math.min(roomCount, prev + 1))} className="w-6.5 h-6.5 rounded bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-300">+</button>
                 </div>
-                <span className="text-[9px] text-slate-500 mt-0.5 font-mono">+RM 200/night surcharge</span>
+                <span className="text-[9px] text-slate-500 mt-0.5 font-mono">+RM 200/night</span>
               </div>
 
             </div>
           </div>
 
-          {/* Section 4: Add-ons & Equipment */}
+          {/* Section 5: Add-ons & Equipment */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
             <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit border-b border-slate-700/40 pb-3">
               <Anchor className="w-5 h-5 text-cyan-400" />
-              4. Optional Add-ons & Equipment Rentals
+              5. Optional Add-ons & Equipment Rentals
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              <label className="flex items-center gap-3 bg-slate-950/40 hover:bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 cursor-pointer transition">
+              <label className="flex items-center gap-3 bg-slate-955 hover:bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 cursor-pointer transition">
                 <input
                   type="checkbox"
                   checked={includeBoatTransfer}
@@ -507,7 +569,7 @@ export default function MideCalculatorPage() {
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 bg-slate-950/40 hover:bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 cursor-pointer transition">
+              <label className="flex items-center gap-3 bg-slate-955 hover:bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 cursor-pointer transition">
                 <input
                   type="checkbox"
                   checked={includeSnorkelingGear}
@@ -520,22 +582,22 @@ export default function MideCalculatorPage() {
                 </div>
               </label>
 
-              <div className="flex items-center gap-3 bg-slate-950/40 border border-slate-800 rounded-xl p-3 relative overflow-hidden">
+              <div className="flex items-center gap-3 bg-slate-955 border border-slate-800 rounded-xl p-3 relative overflow-hidden">
                 {!hasDiverPackage && (
-                  <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[0.5px] z-10 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-slate-955 backdrop-blur-[0.5px] z-10 flex items-center justify-center">
                     <span className="text-[10px] text-slate-500 font-bold">Only for Scuba Divers</span>
                   </div>
                 )}
-                <div className="flex flex-col gap-1 w-full">
-                  <div className="flex justify-between items-center text-xs font-bold text-slate-200">
+                <div className="flex flex-col gap-1 w-full font-mono">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-250">
                     <span className="font-outfit">Scuba Gear</span>
-                    <span className="text-coral-glow text-[10px] font-mono">RM 90/day</span>
+                    <span className="text-coral-glow text-[10px]">RM 90/day</span>
                   </div>
                   <div className="flex items-center justify-between mt-1 text-[10px]">
-                    <span className="text-slate-400 font-mono">Days:</span>
+                    <span className="text-slate-400">Days:</span>
                     <div className="flex items-center gap-2">
                       <button type="button" onClick={() => setScubaGearDays(prev => Math.max(0, prev - 1))} className="w-5.5 h-5.5 rounded bg-slate-800 text-xs text-slate-300">-</button>
-                      <span className="text-xs font-bold text-slate-200 font-mono">{scubaGearDays}</span>
+                      <span className="text-xs font-bold text-slate-200">{scubaGearDays}</span>
                       <button type="button" onClick={() => setScubaGearDays(prev => prev + 1)} className="w-5.5 h-5.5 rounded bg-slate-800 text-xs text-slate-300">+</button>
                     </div>
                   </div>
@@ -544,31 +606,31 @@ export default function MideCalculatorPage() {
             </div>
           </div>
 
-          {/* Section 5: Promos & Discounts */}
+          {/* Section 6: Promos & Discounts */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
             <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 font-outfit border-b border-slate-700/40 pb-3">
               <Tag className="w-5 h-5 text-coral-glow glow-coral animate-pulse-slow" />
-              5. MIDE Expo Promos & Discounts
+              6. MIDE Expo Promos & Discounts
             </h2>
 
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(0); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${discountValue === 0 ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>No Discount</button>
-              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(5); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${discountValue === 5 && discountType === 'percentage' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>5% MIDE Promo</button>
-              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(10); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${discountValue === 10 && discountType === 'percentage' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>10% Expo Promo</button>
-              <button type="button" onClick={() => { setDiscountType('flat'); setDiscountValue(100); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${discountValue === 100 && discountType === 'flat' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>RM 100 Early Bird</button>
-              <button type="button" onClick={() => { setDiscountType('flat'); setDiscountValue(200); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${discountValue === 200 && discountType === 'flat' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>RM 200 Group Booking</button>
+              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(0); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${discountValue === 0 ? 'bg-slate-800 text-slate-350 border border-slate-700' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>No Discount</button>
+              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(5); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${discountValue === 5 && discountType === 'percentage' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>5% MIDE Promo</button>
+              <button type="button" onClick={() => { setDiscountType('percentage'); setDiscountValue(10); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${discountValue === 10 && discountType === 'percentage' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>10% Expo Promo</button>
+              <button type="button" onClick={() => { setDiscountType('flat'); setDiscountValue(100); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${discountValue === 100 && discountType === 'flat' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>RM 100 Early Bird</button>
+              <button type="button" onClick={() => { setDiscountType('flat'); setDiscountValue(200); }} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition cursor-pointer ${discountValue === 200 && discountType === 'flat' ? 'bg-cyan-950/80 text-cyan-200 border border-cyan-500/30' : 'bg-slate-950/60 text-slate-500 border border-slate-800/80'}`}>RM 200 Group Booking</button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1.5">
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs text-slate-350">Discount Type</span>
-                <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-1 rounded-lg border border-slate-800">
-                  <button type="button" onClick={() => setDiscountType('percentage')} className={`py-1.5 text-xs font-bold rounded transition ${discountType === 'percentage' ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/20' : 'text-slate-400'}`}>Percent (%)</button>
-                  <button type="button" onClick={() => setDiscountType('flat')} className={`py-1.5 text-xs font-bold rounded transition ${discountType === 'flat' ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/20' : 'text-slate-400'}`}>Cash (RM)</button>
+                <span className="text-xs text-slate-355">Discount Type</span>
+                <div className="grid grid-cols-2 gap-2 bg-slate-955 p-1 rounded-lg border border-slate-800">
+                  <button type="button" onClick={() => setDiscountType('percentage')} className={`py-1.5 text-xs font-bold rounded transition cursor-pointer ${discountType === 'percentage' ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/20' : 'text-slate-450'}`}>Percent (%)</button>
+                  <button type="button" onClick={() => setDiscountType('flat')} className={`py-1.5 text-xs font-bold rounded transition cursor-pointer ${discountType === 'flat' ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/20' : 'text-slate-455'}`}>Cash (RM)</button>
                 </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs text-slate-355">Custom Deduction</span>
+              <div className="flex flex-col gap-1.5 font-mono">
+                <span className="text-xs text-slate-355 font-outfit">Custom Deduction</span>
                 <div className="relative">
                   <input
                     type="number"
@@ -579,7 +641,7 @@ export default function MideCalculatorPage() {
                     className="w-full bg-slate-950/60 border border-slate-700/60 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 focus:ring-1"
                   />
                   <div className="absolute right-3 top-2 text-slate-500">
-                    {discountType === 'percentage' ? <Percent className="w-3.5 h-3.5" /> : <span className="text-xs font-bold font-mono">RM</span>}
+                    {discountType === 'percentage' ? <Tag className="w-3.5 h-3.5 text-slate-650" /> : <span className="text-xs font-bold">RM</span>}
                   </div>
                 </div>
               </div>
@@ -589,225 +651,22 @@ export default function MideCalculatorPage() {
 
         {/* --- RIGHT INVOICE: 5 cols --- */}
         <section className="lg:col-span-5 lg:sticky lg:top-6 flex flex-col gap-6">
-          
-          <div className="glass-panel rounded-2xl border-cyan-500/25 shadow-cyan-950/20 shadow-2xl relative overflow-hidden flex flex-col gap-5 p-6">
-            
-            {/* Invoice Header */}
-            <div className="flex justify-between items-start border-b border-slate-700/40 pb-4">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-cyan-300 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                  <TrendingUp className="w-3.5 h-3.5" /> Live Quotation
-                </span>
-                <span className="text-base font-extrabold text-slate-100 font-outfit mt-0.5">
-                  {!travelDatesConfirmed && lockPriceSelected ? '🔒 Price-Lock Guarantee' : '📋 Expo Proposal Invoice'}
-                </span>
-              </div>
-              <div className="bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-mono text-xs px-2.5 py-1 rounded-lg font-bold">
-                {duration}
-              </div>
-            </div>
-
-            {/* Calculations Breakdown */}
-            <div className="flex flex-col gap-3 font-mono text-xs text-slate-300">
-              
-              {/* Itemized Base Packages Listing */}
-              <div className="flex flex-col gap-2 border-b border-slate-800/40 pb-3">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Accommodation Packages:</span>
-                {packageSelections.map((item) => {
-                  const pkg = pricing.packages.find(p => p.id === item.packageId) || pricing.packages[0];
-                  let basePrice = 0;
-                  const totalGuests = packageSelections.reduce((sum, it) => sum + it.adultCount + it.childCount, 0);
-                  const occupancy = totalGuests > 0 ? Math.ceil(totalGuests / roomCount) : 2;
-                  
-                  if (pkg.category === 'course') {
-                    basePrice = roomCategoryId === 'dorm' ? pkg.rates.dorm : (occupancy >= 3 ? pkg.rates.triple_quad : pkg.rates.twin);
-                  } else {
-                    const touchWeekend = travelDatesConfirmed && weekendTravel;
-                    const ratesTable = touchWeekend ? pkg.rates.weekend : pkg.rates.weekday;
-                    basePrice = occupancy >= 4 ? (ratesTable.dorm_quad || ratesTable.quad) : (occupancy === 3 ? ratesTable.triple : ratesTable.twin);
-                  }
-                  
-                  const childPrice = Math.round(basePrice * 0.6);
-                  const rowTotal = (item.adultCount * basePrice) + (item.childCount * childPrice);
-                  
-                  return (
-                    <div key={item.id} className="flex justify-between items-start text-xs font-mono text-slate-300">
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-bold text-slate-200">{pkg.name}</span>
-                        <span className="text-[9px] text-slate-500 mt-0.5">
-                          {item.adultCount > 0 && `${item.adultCount}A × RM${basePrice}`}
-                          {item.childCount > 0 && ` + ${item.childCount}C × RM${childPrice}`}
-                        </span>
-                      </div>
-                      <span className="font-bold text-slate-200">RM {rowTotal.toFixed(2)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {result.roomUpgradeTotal > 0 && (
-                <div className="flex justify-between items-center border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Room Upgrade Surcharge:</span>
-                  <span className="font-bold text-slate-200 font-mono">RM {result.roomUpgradeTotal.toFixed(2)}</span>
-                </div>
-              )}
-
-              {travelDatesConfirmed && result.singleOccupancyTotal > 0 && (
-                <div className="flex justify-between items-center border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Single Room Surcharge:</span>
-                  <span className="font-bold text-slate-200">RM {result.singleOccupancyTotal.toFixed(2)}</span>
-                </div>
-              )}
-
-              {travelDatesConfirmed && result.surcharges.grandSurchargesTotal > 0 && (
-                <div className="flex justify-between items-start border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Date Surcharges:</span>
-                  <div className="text-right">
-                    <span className="font-bold text-slate-200">RM {result.surcharges.grandSurchargesTotal.toFixed(2)}</span>
-                    <div className="text-[9px] text-slate-500">
-                      {result.surcharges.weekendTotal > 0 && `Wknd `}
-                      {peakSeason && `Peak `}
-                      {superPeakSeason && `Super Peak`}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center border-t border-slate-800/40 pt-2">
-                <span className="text-slate-400">SST Tax ({pricing.taxSstPercentage}%):</span>
-                <span className="font-bold text-slate-200">RM {result.sstTotal.toFixed(2)}</span>
-              </div>
-
-              {result.transfersTotal > 0 && (
-                <div className="flex justify-between items-center border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Boat Transfer:</span>
-                  <span className="font-bold text-slate-200">RM {result.transfersTotal.toFixed(2)}</span>
-                </div>
-              )}
-
-              {result.gearRental.grandGearTotal > 0 && (
-                <div className="flex justify-between items-start border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Gear Rentals:</span>
-                  <div className="text-right">
-                    <span className="font-bold text-slate-200">RM {result.gearRental.grandGearTotal.toFixed(2)}</span>
-                    <div className="text-[9px] text-slate-500">
-                      {includeSnorkelingGear && `Snorkeling Set `}
-                      {scubaGearDays > 0 && `Scuba x${scubaGearDays}d`}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {travelDatesConfirmed && result.tourismTaxTotal > 0 && (
-                <div className="flex justify-between items-center border-t border-slate-800/40 pt-2">
-                  <span className="text-slate-400">Tourism Tax (RM10/rm/nt):</span>
-                  <span className="font-bold text-slate-200">RM {result.tourismTaxTotal.toFixed(2)}</span>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center border-t border-slate-700/50 pt-3 text-slate-200 font-bold">
-                <span>Subtotal Value:</span>
-                <span>RM {result.subtotal.toFixed(2)}</span>
-              </div>
-
-              {result.discountTotal > 0 && (
-                <div className="flex justify-between items-center border-t border-slate-800/40 pt-2 text-coral-glow glow-coral font-bold">
-                  <span>MIDE Expo Discount:</span>
-                  <span>-RM {result.discountTotal.toFixed(2)}</span>
-                </div>
-              )}
-
-              {!travelDatesConfirmed && lockPriceSelected && (
-                <div className="flex justify-between items-center border-t border-cyan-500/20 pt-2.5 text-cyan-300 font-extrabold">
-                  <span>Locked Package Value:</span>
-                  <span>RM {result.estimatedFullPackageTotal.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* GRAND TOTAL DUE */}
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex flex-col items-center gap-1">
-              <span className="text-[9px] text-slate-500 uppercase tracking-widest font-extrabold font-mono">
-                {!travelDatesConfirmed && lockPriceSelected ? '🔒 Deposit Payable Now' : 'Total Payable (MYR)'}
-              </span>
-              <span className={`text-3xl font-black tracking-tight font-inter ${!travelDatesConfirmed && lockPriceSelected ? 'text-coral-400 glow-coral' : 'text-cyan-400 glow-cyan'}`}>
-                RM {result.grandTotal.toFixed(2)}
-              </span>
-              <span className="text-[9px] text-slate-500 text-center font-mono mt-1 leading-normal max-w-[240px]">
-                {!travelDatesConfirmed && lockPriceSelected 
-                  ? 'Locks promotion package prices in full for 1 calendar year (valid until 18-May-2027).'
-                  : 'Includes food, stays, boat transfers, and resort scheduled items.'}
-              </span>
-            </div>
-
-            {/* Sharing actions header */}
-            <div className="flex items-center gap-2 border-t border-slate-800 pt-4">
-              <Share2 className="w-4 h-4 text-slate-400" />
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide font-outfit">Share Proposal Receipt</span>
-            </div>
-
-            {/* Dynamic Promoter Actions */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={copyToClipboard}
-                className="w-full bg-slate-900 border border-slate-700/60 text-slate-200 rounded-xl py-3 px-2 flex items-center justify-center gap-2 text-xs font-bold hover:bg-slate-800 transition cursor-pointer"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-400">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-cyan-400" />
-                    <span>Copy Quote</span>
-                  </>
-                )}
-              </button>
-
-              <a
-                href={emailMailto}
-                className="w-full bg-slate-900 border border-slate-700/60 text-slate-200 rounded-xl py-3 px-2 flex items-center justify-center gap-2 text-xs font-bold hover:bg-slate-800 transition cursor-pointer"
-              >
-                <Mail className="w-4 h-4 text-cyan-400" />
-                <span>Send Email</span>
-              </a>
-
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full col-span-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 rounded-xl py-3.5 px-3 flex items-center justify-center gap-2.5 text-xs font-black hover:from-emerald-400 hover:to-teal-500 shadow-lg transition cursor-pointer"
-              >
-                <Globe className="w-4 h-4" />
-                <span className="tracking-wide uppercase font-outfit">Share WhatsApp Receipt</span>
-              </a>
-
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="w-full col-span-2 border border-slate-850 hover:bg-slate-950 text-slate-400 rounded-lg py-2 flex items-center justify-center gap-1.5 text-[10px] transition cursor-pointer font-mono"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Print Invoice / Save PDF</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Notice */}
-          <div className="bg-slate-950/40 border border-slate-855 rounded-2xl p-4 flex flex-col gap-1">
-            <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-outfit">
-              <HelpCircle className="w-4 h-4 text-cyan-400" /> Quick Reference Guide
-            </span>
-            <ul className="text-[10px] text-slate-400 leading-relaxed list-disc list-inside flex flex-col gap-1 mt-1 font-mono">
-              <li>Infants (0-3 yrs) are free of charge (FOC).</li>
-              <li>Children (4-12 yrs) receive a 40% discount off package.</li>
-              <li>Weekend travel touches a Friday and/or Saturday night stay.</li>
-              <li>SST is 8% and applies to packages + upgrades + dates.</li>
-              <li>Tourism Tax of RM 10/room/night applies only to foreign passports.</li>
-            </ul>
-          </div>
+          <QuotationInvoice
+            customerName={customerName}
+            customerEmail={customerEmail}
+            customerPhone={customerPhone}
+            invoiceNumber={invoiceNumber}
+            result={result}
+            inputParams={inputParams}
+            roomName={roomName}
+            formattedQuoteText={formattedQuoteText}
+            whatsappLink={whatsappLink}
+            emailMailto={emailMailto}
+            duration={duration}
+            totalPax={totalPax}
+            hasDiverPackage={hasDiverPackage}
+            onSaveSuccess={triggerRefreshLedger}
+          />
         </section>
       </main>
 
@@ -818,7 +677,8 @@ export default function MideCalculatorPage() {
         </span>
         <div className="flex items-center gap-3">
           <span className="bg-slate-950 border border-slate-855 px-2 py-0.5 rounded text-slate-400">Next.js App Router</span>
-          <span className="bg-slate-950 border border-slate-855 px-2 py-0.5 rounded text-slate-400">Tailwind CSS v4</span>
+          <span className="bg-slate-950 border border-slate-855 px-2 py-0.5 rounded text-slate-400">Supabase DB</span>
+          <span className="bg-slate-950 border border-slate-855 px-2 py-0.5 rounded text-slate-400">Prisma SQL</span>
         </div>
       </footer>
     </div>
