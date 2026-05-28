@@ -348,6 +348,10 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
     if (result.discountTotal > 0) msg += `  • MIDE Promo Discount: -${currency} ${result.discountTotal.toFixed(2)}\n`;
     msg += `⭐ *Locked Total Value: ${currency} ${result.estimatedFullPackageTotal.toFixed(2)}* (due on booking stay)\n`;
     msg += `-------------------------------------------\n`;
+    msg += `🎉 *MIDE 2026 PROMO ENTITLEMENTS* 🎉\n`;
+    msg += `🎟️ ${result.totalPax}x Grand Prize Lucky Draw Entries\n`;
+    msg += `🎁 ${result.totalPax}x Scratch & Win Chances (Booth Promo)\n`;
+    msg += `-------------------------------------------\n`;
     msg += `📲 _Secure your expo rates by returning this lock voucher back to lock!_`;
   } else {
     // Confirmed dynamic multi-package quote
@@ -402,7 +406,7 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
     msg += `• SST (${pricing.taxSstPercentage}%): ${currency} ${result.sstTotal.toFixed(2)}\n`;
 
     if (result.transfersTotal > 0) {
-      msg += `• Boat Transfers (RM100/A, RM79/C): ${currency} ${result.transfersTotal.toFixed(2)}\n`;
+      msg += `• Boat Transfers (RM100/pax): ${currency} ${result.transfersTotal.toFixed(2)}\n`;
     }
 
     if (result.gearRental.grandGearTotal > 0) {
@@ -427,6 +431,14 @@ export function formatWhatsAppQuote(input: CalculationInput, result: Calculation
     }
 
     msg += `⭐ *GRAND TOTAL: ${currency} ${result.grandTotal.toFixed(2)}* ⭐\n`;
+    msg += `-------------------------------------------\n`;
+    const deposit50 = result.grandTotal * 0.5;
+    msg += `💳 *50% Deposit Required Now:* ${currency} ${deposit50.toFixed(2)}\n`;
+    msg += `💳 *Balance Due (30 Days Before):* ${currency} ${deposit50.toFixed(2)}\n`;
+    msg += `-------------------------------------------\n`;
+    msg += `🎉 *MIDE 2026 PROMO ENTITLEMENTS* 🎉\n`;
+    msg += `🎟️ ${result.totalPax}x Grand Prize Lucky Draw Entries\n`;
+    msg += `🎁 ${result.totalPax}x Scratch & Win Chances (Booth Promo)\n`;
     msg += `-------------------------------------------\n`;
     msg += `📲 _Quotation generated at MIDE 2026 by ${resortName} Promoter._\n`;
     msg += `👉 Contact us to secure your slots!`;

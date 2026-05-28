@@ -257,6 +257,12 @@ export default function QuotationInvoice({
         <span className={`text-3xl font-black tracking-tight font-inter ${!inputParams.travelDatesConfirmed && inputParams.lockPriceSelected ? 'text-coral-400 glow-coral' : 'text-cyan-400 glow-cyan'}`}>
           RM {result.grandTotal.toFixed(2)}
         </span>
+        {inputParams.travelDatesConfirmed && (
+          <div className="flex flex-col items-center mt-2 w-full border-t border-slate-800/60 pt-2">
+            <span className="text-[10px] text-slate-400 font-bold">💳 50% Deposit Now: <span className="text-cyan-300">RM {(result.grandTotal * 0.5).toFixed(2)}</span></span>
+            <span className="text-[10px] text-slate-400 font-bold">💳 Balance (30d before): <span className="text-cyan-300">RM {(result.grandTotal * 0.5).toFixed(2)}</span></span>
+          </div>
+        )}
         <span className="text-[9px] text-slate-500 text-center font-mono mt-1 leading-normal max-w-[240px]">
           {!inputParams.travelDatesConfirmed && inputParams.lockPriceSelected
             ? 'Locks promotion package prices in full for 1 calendar year (valid until 18-May-2027).'

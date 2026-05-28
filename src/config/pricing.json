@@ -13,7 +13,7 @@
   "transfers": {
     "boatTransfer": {
       "adult": 100,
-      "child": 79
+      "child": 100
     }
   },
   "gearRental": {
