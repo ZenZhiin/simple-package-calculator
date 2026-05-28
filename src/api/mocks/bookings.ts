@@ -30,7 +30,7 @@ export interface MockBooking {
 export let mockBookings: MockBooking[] = [
   {
     id: "demo-booking-1",
-    customerName: "Jason Ho Mock Data",
+    customerName: "Mock Data",
     customerEmail: "MockData@mock.com",
     customerPhone: "+60123456789",
     invoiceNumber: "MIDE-2026-1042",
